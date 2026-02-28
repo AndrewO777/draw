@@ -1,0 +1,25 @@
+#include<SDL3/SDL.h>
+
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
+#define ACTION_STACK_MAX_SIZE 64
+
+typedef struct Action{
+    SDL_Texture* p_data;
+    struct Action* p_prev;
+} Action; 
+
+typedef struct Window {
+    SDL_Window* p_window;
+    SDL_Renderer* p_screen_renderer;
+    SDL_Texture* p_texture;
+    SDL_Texture* p_clipboard_texture;
+    SDL_FRect clipboard_rect;
+    Action* p_action_head;
+    int stack_size;
+} Window;
+
+void close_sdl(Window* p_win);
+Window* create_window();
+void pop_action(Action** p_p_head, int* p_stack_size);
+void add_action(Window* p_win);

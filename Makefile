@@ -1,6 +1,6 @@
 include config.mk
 
-OBJS=draw.c
+OBJS=main.c draw.c window.c
 CC=gcc
 COMPILER_FLAGS=-Wall -Wextra
 LINKER_FLAGS=-lSDL3
