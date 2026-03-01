@@ -94,6 +94,7 @@ int main() {
                             p_win->p_clipboard_texture = copy_texture(p_win->p_screen_renderer, p_win->p_texture, &rect);
                             p_win->clipboard_rect = rect;
                             b_selected = true;
+                            b_update = true;
                             b_selecting = false;
                         } else if(b_dragging) {
                             draw(p_win->p_screen_renderer, p_win->p_clipboard_texture, p_win->p_texture, NULL, &p_win->clipboard_rect);
@@ -176,7 +177,7 @@ int main() {
                     } else if (e.key.key == SDLK_D) {
                         b_update = !b_update;
                         b_selecting = false;
-                        b_draw_rect = b_selected = b_dragging = b_selected;
+                        b_draw_rect = b_selected = b_dragging = b_selecting;
                     } else if (e.key.key == SDLK_B) {
                         b_draw_rect = !b_draw_rect;
                         b_update = !b_draw_rect;

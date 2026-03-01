@@ -35,7 +35,7 @@ Window* create_window() {
         printf("Couldn't init: %s\n", SDL_GetError());
         return NULL;
     }
-    Window* p_win = malloc(sizeof(Window));
+    Window* p_win = calloc(1,sizeof(Window));
     SDL_CreateWindowAndRenderer("Draw", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE, &p_win->p_window, &p_win->p_screen_renderer);
     if(p_win->p_window == NULL) {
         printf("Failed to create window: %s\n", SDL_GetError());
@@ -59,7 +59,7 @@ void pop_action(Action** p_p_head, int* p_stack_size) {
 }
 
 void add_action(Window* p_win) {
-    Action* p_new_action = malloc(sizeof(Action));
+    Action* p_new_action = calloc(1,sizeof(Action));
     p_new_action->p_data = copy_texture(p_win->p_screen_renderer, p_win->p_texture,NULL);
     p_new_action->p_prev = p_win->p_action_head;
     p_win->p_action_head = p_new_action;
