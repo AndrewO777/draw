@@ -74,6 +74,7 @@ int main() {
                                 SDL_DestroyTexture(p_temp_texture);
                             } else {
                                 b_dragging = false;
+                                b_selected = false;
                             }
                         } 
                         b_drawing = true;
