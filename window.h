@@ -9,6 +9,14 @@ typedef struct Action{
     struct Action* p_prev;
 } Action; 
 
+typedef enum Mode {
+    DRAWING = 0,
+    DRAWING_NO_UPDATE,
+    BOX_DRAWING,
+    SELECTING,
+    DRAGGING
+} Mode;
+
 typedef struct Window {
     SDL_Window* p_window;
     SDL_Renderer* p_screen_renderer;
@@ -17,7 +25,9 @@ typedef struct Window {
     SDL_FRect clipboard_rect;
     Action* p_action_head;
     int stack_size;
+    Mode mode;
 } Window;
+
 
 // Handles closing the program, frees heap memory, and calls all the SDL destroy functions needed.
 void close_sdl(Window* p_win);
