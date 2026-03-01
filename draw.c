@@ -1,10 +1,6 @@
 #include <SDL3/SDL.h>
 #include<stdio.h>
 
-/* Draws p_draw_texture to p_target_texture at p_dst_rect, if target texture is NULL it will draw to the window instead.
- * If draw texture is NULL, will color target texture gray.
- * Should maybe split this into draw_texture and draw_window
-*/
 void draw(SDL_Renderer* p_renderer, SDL_Texture* p_draw_texture, SDL_Texture* p_target_texture,SDL_FRect* p_src_rect, SDL_FRect* p_dst_rect) {
     if(p_renderer == NULL) { return; }
     if(SDL_GetRenderTarget(p_renderer) != NULL || p_target_texture != NULL) {
@@ -21,7 +17,6 @@ void draw(SDL_Renderer* p_renderer, SDL_Texture* p_draw_texture, SDL_Texture* p_
     }
 }
 
-// Returns a rectangle with the two points as opposite corners.
 SDL_FRect get_rect(int x1, int x2, int y1, int y2) {
     SDL_FRect rect;
     rect.x = x1 < x2 ? x1 : x2;
@@ -85,16 +80,6 @@ void draw_select_box(SDL_Renderer* p_renderer, SDL_Texture* p_texture, float x1,
     }
     draw(p_renderer, p_texture, NULL, NULL, NULL);
 }
-
-/* Could be useful
-void draw_point(SDL_Renderer* p_renderer, SDL_Texture* p_texture, float x, float y) {
-    SDL_SetRenderTarget(p_renderer, p_texture);
-    SDL_SetRenderDrawColor(p_renderer, 0xFF, 0xFF, 0xFF, 255);
-    SDL_RenderPoint(p_renderer, x, y);
-    SDL_SetRenderTarget(p_renderer, NULL);
-    SDL_RenderTexture(p_renderer, p_texture, NULL, NULL);
-    SDL_RenderPresent(p_renderer);
-}*/
 
 SDL_Texture* copy_texture(SDL_Renderer* p_renderer, SDL_Texture* p_texture, SDL_FRect* p_src_rect) { 
     if(p_renderer == NULL || p_texture == NULL) { return NULL; }

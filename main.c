@@ -12,8 +12,8 @@ int main() {
     p_win->p_action_head = NULL;
     p_win->p_clipboard_texture = NULL;
     p_win->stack_size = 0;
-    bool b_quit, b_drawing , b_resizing, b_update, b_selecting, b_draw_rect = false;
-    b_quit = b_drawing = b_resizing = b_selecting = b_draw_rect;
+    bool b_quit, b_drawing , b_resizing, b_update, b_selecting, b_selected, b_dragging, b_draw_rect = false;
+    b_quit = b_drawing = b_resizing = b_selecting = b_selected = b_dragging = b_draw_rect;
     b_update = true;
     float start_x = 0;
     float start_y = 0;
@@ -60,6 +60,22 @@ int main() {
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     b_resizing = false;
                     if (e.button.button == SDL_BUTTON_LEFT) {
+                        if(b_selected) {
+                            // Handle moving selected region here
+                            if(e.button.x >= p_win->clipboard_rect.x && 
+                                    e.button.x <= p_win->clipboard_rect.x + p_win->clipboard_rect.w &&
+                                    e.button.y >= p_win->clipboard_rect.y &&
+                                    e.button.y <= p_win->clipboard_rect.y + p_win->clipboard_rect.h) {
+                                b_dragging = true;
+                                SDL_Texture* p_temp_texture = SDL_CreateTexture(p_win->p_screen_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, p_win->clipboard_rect.w, p_win->clipboard_rect.h);
+                                draw(p_win->p_screen_renderer, NULL, p_temp_texture, NULL, NULL);
+                                draw(p_win->p_screen_renderer, p_temp_texture, p_win->p_texture, NULL, &p_win->clipboard_rect);
+                                draw(p_win->p_screen_renderer, p_win->p_texture, NULL, NULL, NULL);
+                                SDL_DestroyTexture(p_temp_texture);
+                            } else {
+                                b_dragging = false;
+                            }
+                        } 
                         b_drawing = true;
                         start_x = e.button.x;
                         start_y = e.button.y;
@@ -77,6 +93,23 @@ int main() {
                             SDL_DestroyTexture(p_win->p_clipboard_texture);
                             p_win->p_clipboard_texture = copy_texture(p_win->p_screen_renderer, p_win->p_texture, &rect);
                             p_win->clipboard_rect = rect;
+                            b_selected = true;
+                            b_selecting = false;
+                        } else if(b_dragging) {
+                            draw(p_win->p_screen_renderer, p_win->p_clipboard_texture, p_win->p_texture, NULL, &p_win->clipboard_rect);
+                            draw(p_win->p_screen_renderer, p_win->p_texture, NULL, NULL, NULL);
+                            SDL_Texture* p_temp_texture = SDL_CreateTexture(p_win->p_screen_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, texture_width, texture_height);
+                            if(p_temp_texture == NULL) {
+                                printf("Failed to create select box indicator texture: SDL_Error %s\n", SDL_GetError());
+                                close_sdl(p_win);
+                            }
+                            draw(p_win->p_screen_renderer, p_win->p_texture, p_temp_texture, NULL, NULL);
+                            draw_select_box(p_win->p_screen_renderer, 
+                                    p_temp_texture, 
+                                    p_win->clipboard_rect.x, 
+                                    p_win->clipboard_rect.x+p_win->clipboard_rect.w, 
+                                    p_win->clipboard_rect.y, 
+                                    p_win->clipboard_rect.y+p_win->clipboard_rect.h);
                         }
                         add_action(p_win);
                     }
@@ -87,26 +120,45 @@ int main() {
                         break;
                     }
                     if(b_draw_rect) {
-                        SDL_Texture* temp_texture = SDL_CreateTexture(p_win->p_screen_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, texture_width, texture_height);
-                        if(temp_texture == NULL) {
+                        SDL_Texture* p_temp_texture = SDL_CreateTexture(p_win->p_screen_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, texture_width, texture_height);
+                        if(p_temp_texture == NULL) {
                             printf("Failed to create box indicator texture: SDL_Error %s\n", SDL_GetError());
                             close_sdl(p_win);
                         }
-                        draw(p_win->p_screen_renderer, p_win->p_texture, temp_texture, NULL, NULL);
+                        draw(p_win->p_screen_renderer, p_win->p_texture, p_temp_texture, NULL, NULL);
                         SDL_FRect rect = get_rect(start_x, e.motion.x, start_y, e.motion.y);
-                        draw_rect(p_win->p_screen_renderer, temp_texture, &rect);
-                        SDL_DestroyTexture(temp_texture);
+                        draw_rect(p_win->p_screen_renderer, p_temp_texture, &rect);
+                        SDL_DestroyTexture(p_temp_texture);
                         break;
                     } else if(b_selecting) {
-                        SDL_Texture* temp_texture = SDL_CreateTexture(p_win->p_screen_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, texture_width, texture_height);
-                        if(temp_texture == NULL) {
+                        SDL_Texture* p_temp_texture = SDL_CreateTexture(p_win->p_screen_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, texture_width, texture_height);
+                        if(p_temp_texture == NULL) {
                             printf("Failed to create select box indicator texture: SDL_Error %s\n", SDL_GetError());
                             close_sdl(p_win);
                         }
-                        draw(p_win->p_screen_renderer, p_win->p_texture, temp_texture, NULL, NULL);
-                        draw_select_box(p_win->p_screen_renderer, temp_texture, start_x, e.motion.x, start_y, e.motion.y);
-                        SDL_DestroyTexture(temp_texture);
+                        draw(p_win->p_screen_renderer, p_win->p_texture, p_temp_texture, NULL, NULL);
+                        draw_select_box(p_win->p_screen_renderer, p_temp_texture, start_x, e.motion.x, start_y, e.motion.y);
+                        SDL_DestroyTexture(p_temp_texture);
                         break;
+                    } else if(b_dragging) {
+                        SDL_Texture* p_temp_texture = SDL_CreateTexture(p_win->p_screen_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, texture_width, texture_height);
+                        if(p_temp_texture == NULL) {
+                            printf("Failed to create select box indicator texture: SDL_Error %s\n", SDL_GetError());
+                            close_sdl(p_win);
+                        }
+                        int center_x = e.motion.x-p_win->clipboard_rect.w/2;
+                        int center_y = e.motion.y-p_win->clipboard_rect.h/2;
+                        SDL_FRect dst_rect = {center_x, center_y, p_win->clipboard_rect.w, p_win->clipboard_rect.h};
+                        draw(p_win->p_screen_renderer, p_win->p_texture, p_temp_texture, NULL, NULL);
+                        draw(p_win->p_screen_renderer, p_win->p_clipboard_texture, p_temp_texture, NULL, &dst_rect);
+                        draw_select_box(p_win->p_screen_renderer, 
+                                p_temp_texture, 
+                                center_x, 
+                                e.motion.x+p_win->clipboard_rect.w/2, 
+                                center_y, 
+                                e.motion.y+p_win->clipboard_rect.h/2);
+                        p_win->clipboard_rect = dst_rect;
+                        SDL_DestroyTexture(p_temp_texture);
                     } else {
                         draw_line(p_win->p_screen_renderer, p_win->p_texture, start_x, e.motion.x, start_y, e.motion.y);
                     }
@@ -121,18 +173,20 @@ int main() {
                         draw(p_win->p_screen_renderer, NULL, p_win->p_texture, NULL, NULL);
                         draw(p_win->p_screen_renderer, p_win->p_texture, NULL, NULL, NULL);
                         add_action(p_win);
-                    } else if (e.key.key == SDLK_C) {
+                    } else if (e.key.key == SDLK_D) {
                         b_update = !b_update;
                         b_selecting = false;
-                        b_draw_rect = false;
+                        b_draw_rect = b_selected = b_dragging = b_selected;
                     } else if (e.key.key == SDLK_B) {
                         b_draw_rect = !b_draw_rect;
                         b_update = !b_draw_rect;
                         b_selecting = false;
+                        b_selected = b_dragging = b_selecting;
                     } else if (e.key.key == SDLK_S) {
                         b_selecting = !b_selecting;
                         b_update = !b_selecting;
                         b_draw_rect = false;
+                        b_selected = b_dragging = b_draw_rect;
                     } else if(e.key.key == SDLK_X) {
                         if(p_win->p_clipboard_texture != NULL) {
                             float center_x, center_y;
@@ -143,7 +197,6 @@ int main() {
                             draw(p_win->p_screen_renderer, p_win->p_clipboard_texture, p_win->p_texture, NULL, &dst_rect);
                             draw(p_win->p_screen_renderer, p_win->p_texture, NULL, NULL, NULL);
                             add_action(p_win);
-                            b_selecting = false;
                         }
                     } else if (e.key.key == SDLK_Z) {
                         if(p_win->p_action_head->p_prev != NULL) {

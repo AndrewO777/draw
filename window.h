@@ -19,7 +19,13 @@ typedef struct Window {
     int stack_size;
 } Window;
 
+// Handles closing the program, frees heap memory, and calls all the SDL destroy functions needed.
 void close_sdl(Window* p_win);
+// Creates the SDL_Window, SDL_Renderer then returns a pointer to a Window object containing them stored on the heap.
 Window* create_window();
+// Pop action from end of the linked list of actions.
 void pop_action(Action** p_p_head, int* p_stack_size);
+/* Add action to the end of the linked list of actions.
+ * If we are at the action stack max then we add an action to the end then remove the first action in the list.
+ */
 void add_action(Window* p_win);
