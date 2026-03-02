@@ -85,7 +85,8 @@ int main() {
                         b_drawing = false;
                         if(p_win->mode == BOX_DRAWING) {
                             SDL_FRect rect = get_rect(start_x, e.button.x, start_y, e.button.y);
-                            draw_rect(p_win->p_screen_renderer, p_win->p_texture, &rect);
+                            const RGBA color = {0xFF, 0xFF, 0xFF, 255};
+                            draw_rect(p_win->p_screen_renderer, p_win->p_texture, &rect, color);
                         } else if(p_win->mode == SELECTING) {
                             SDL_FRect rect = get_rect(start_x, e.button.x, start_y, e.button.y);
                             SDL_DestroyTexture(p_win->p_clipboard_texture);
@@ -124,7 +125,8 @@ int main() {
                         }
                         draw(p_win->p_screen_renderer, p_win->p_texture, p_temp_texture, NULL, NULL);
                         SDL_FRect rect = get_rect(start_x, e.motion.x, start_y, e.motion.y);
-                        draw_rect(p_win->p_screen_renderer, p_temp_texture, &rect);
+                        const RGBA color = {0xFF, 0xFF, 0xFF, 255};
+                        draw_rect(p_win->p_screen_renderer, p_temp_texture, &rect, color);
                         SDL_DestroyTexture(p_temp_texture);
                         break;
                     } else if(p_win->mode == SELECTING) {
@@ -156,8 +158,12 @@ int main() {
                                 e.motion.y+p_win->clipboard_rect.h/2);
                         p_win->clipboard_rect = dst_rect;
                         SDL_DestroyTexture(p_temp_texture);
+                    } else if(p_win->mode == ERASING) {
+                        const RGBA color = {0x44, 0x44, 0x44, 255};
+                        draw_circle(p_win->p_screen_renderer, p_win->p_texture, e.motion.x, e.motion.y, 40, color);
                     } else {
-                        draw_line(p_win->p_screen_renderer, p_win->p_texture, start_x, e.motion.x, start_y, e.motion.y);
+                        const RGBA color = {0xFF, 0xFF, 0xFF, 255};
+                        draw_line(p_win->p_screen_renderer, p_win->p_texture, start_x, e.motion.x, start_y, e.motion.y, color);
                     }
                     if(p_win->mode == DRAWING) {
                         start_x = e.motion.x;
@@ -171,14 +177,16 @@ int main() {
                         draw(p_win->p_screen_renderer, p_win->p_texture, NULL, NULL, NULL);
                         add_action(p_win);
                         p_win->mode = DRAWING;
-                    } else if (e.key.key == SDLK_D) {
+                    } else if(e.key.key == SDLK_D) {
                         p_win->mode = DRAWING;
-                    } else if (e.key.key == SDLK_W) {
+                    } else if(e.key.key == SDLK_W) {
                         p_win->mode = DRAWING_NO_UPDATE;
-                    } else if (e.key.key == SDLK_B) {
+                    } else if(e.key.key == SDLK_B) {
                         p_win->mode = BOX_DRAWING;
-                    } else if (e.key.key == SDLK_S) {
+                    } else if(e.key.key == SDLK_S) {
                         p_win->mode = SELECTING;
+                    } else if(e.key.key == SDLK_E) {
+                        p_win->mode = ERASING;
                     } else if(e.key.key == SDLK_X) {
                         if(p_win->p_clipboard_texture != NULL) {
                             float center_x, center_y;

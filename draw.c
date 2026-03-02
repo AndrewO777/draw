@@ -1,5 +1,7 @@
 #include <SDL3/SDL.h>
 #include<stdio.h>
+#include<math.h>
+#include"draw.h"
 
 void draw(SDL_Renderer* p_renderer, SDL_Texture* p_draw_texture, SDL_Texture* p_target_texture,SDL_FRect* p_src_rect, SDL_FRect* p_dst_rect) {
     if(p_renderer == NULL) { return; }
@@ -26,19 +28,38 @@ SDL_FRect get_rect(int x1, int x2, int y1, int y2) {
     return rect;
 }
 
-void draw_rect(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const SDL_FRect* p_rect) {
+void draw_rect(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const SDL_FRect* p_rect, const RGBA color) {
     if(p_renderer == NULL || p_rect == NULL) { return; }
     SDL_SetRenderTarget(p_renderer, p_texture);
-    SDL_SetRenderDrawColor(p_renderer, 0xFF, 0xFF, 0xFF, 255);
+    SDL_SetRenderDrawColor(p_renderer, color.red, color.green, color.blue, color.alpha);
     SDL_RenderRect(p_renderer, p_rect);
     draw(p_renderer, p_texture, NULL, NULL, NULL);
 }
 
-void draw_line(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const float x1, const float x2, const float y1, const float y2) {
+void draw_line(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const float x1, const float x2, const float y1, const float y2, const RGBA color) {
     if(p_renderer == NULL || p_texture == NULL) { return; }
     SDL_SetRenderTarget(p_renderer, p_texture);
-    SDL_SetRenderDrawColor(p_renderer, 0xFF, 0xFF, 0xFF, 255);
+    SDL_SetRenderDrawColor(p_renderer, color.red, color.green, color.blue, color.alpha);
     SDL_RenderLine(p_renderer, x1, y1, x2, y2);
+    draw(p_renderer, p_texture, NULL, NULL, NULL);
+}
+
+void draw_circle(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const float x, const float y, const float radius, const RGBA color) {
+    if(p_renderer == NULL || p_texture == NULL) { return; }
+    SDL_SetRenderTarget(p_renderer, p_texture);
+    SDL_SetRenderDrawColor(p_renderer, color.red, color.green, color.blue, color.alpha);
+    int a,b = 0;
+    SDL_RenderPoint(p_renderer, x, y);
+    while(b < radius) {
+        a = sqrt(radius*radius - b*b);
+        for(int i = 0; i < a; ++i) {
+            SDL_RenderPoint(p_renderer, x+i, y+b);
+            SDL_RenderPoint(p_renderer, x-i, y+b);
+            SDL_RenderPoint(p_renderer, x+i, y-b);
+            SDL_RenderPoint(p_renderer, x-i, y-b);
+        }
+        ++b;
+    }
     draw(p_renderer, p_texture, NULL, NULL, NULL);
 }
 

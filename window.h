@@ -14,7 +14,8 @@ typedef enum Mode {
     DRAWING_NO_UPDATE,
     BOX_DRAWING,
     SELECTING,
-    DRAGGING
+    DRAGGING,
+    ERASING
 } Mode;
 
 typedef struct Window {
