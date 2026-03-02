@@ -1,3 +1,4 @@
+#include <math.h>
 #include<stdbool.h>
 #include<stdio.h>
 #include"window.h"
@@ -12,10 +13,13 @@ int main() {
     p_win->stack_size = 0;
     p_win->mode = 0;
 
-    bool b_quit, b_drawing, b_resizing = false;
-    b_quit = b_drawing = b_resizing;
+    bool b_quit, b_drawing, b_picking_color, b_resizing = false;
+    b_quit = b_drawing = b_picking_color = b_resizing;
     float start_x = 0;
     float start_y = 0;
+    float picker_x = 0;
+    float picker_y = 0;
+    RGBA color = {0xFF,0xFF,0xFF,255};
     // Creating the texture we will draw everything to and presenting
     int texture_width, texture_height;
     SDL_GetWindowSize(p_win->p_window, &texture_width, &texture_height);
@@ -59,6 +63,18 @@ int main() {
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     b_resizing = false;
                     if (e.button.button == SDL_BUTTON_LEFT) {
+                        if(b_picking_color) {
+                            if(e.button.x <= picker_x+255 && 
+                                    e.button.x >= picker_x &&
+                                    e.button.y <= picker_y+255 &&
+                                    e.button.y >= picker_y) {
+                                RGBA new_color = {e.button.x-picker_x, e.button.y-picker_y, 255-fabsf((e.button.x-picker_x)-(e.button.y-picker_y)), 255};
+                                color = new_color;
+                            }
+                            draw(p_win->p_screen_renderer, p_win->p_texture, NULL, NULL, NULL);
+                            b_picking_color = false;
+                            break;
+                        }
                         if(p_win->mode == DRAGGING) {
                             // Handle moving selected region here
                             if(e.button.x >= p_win->clipboard_rect.x && 
@@ -85,7 +101,6 @@ int main() {
                         b_drawing = false;
                         if(p_win->mode == BOX_DRAWING) {
                             SDL_FRect rect = get_rect(start_x, e.button.x, start_y, e.button.y);
-                            const RGBA color = {0xFF, 0xFF, 0xFF, 255};
                             draw_rect(p_win->p_screen_renderer, p_win->p_texture, &rect, color);
                         } else if(p_win->mode == SELECTING) {
                             SDL_FRect rect = get_rect(start_x, e.button.x, start_y, e.button.y);
@@ -125,7 +140,6 @@ int main() {
                         }
                         draw(p_win->p_screen_renderer, p_win->p_texture, p_temp_texture, NULL, NULL);
                         SDL_FRect rect = get_rect(start_x, e.motion.x, start_y, e.motion.y);
-                        const RGBA color = {0xFF, 0xFF, 0xFF, 255};
                         draw_rect(p_win->p_screen_renderer, p_temp_texture, &rect, color);
                         SDL_DestroyTexture(p_temp_texture);
                         break;
@@ -159,10 +173,9 @@ int main() {
                         p_win->clipboard_rect = dst_rect;
                         SDL_DestroyTexture(p_temp_texture);
                     } else if(p_win->mode == ERASING) {
-                        const RGBA color = {0x44, 0x44, 0x44, 255};
-                        draw_circle(p_win->p_screen_renderer, p_win->p_texture, e.motion.x, e.motion.y, 40, color);
+                        const RGBA color_erase = {0x44, 0x44, 0x44, 255};
+                        draw_circle(p_win->p_screen_renderer, p_win->p_texture, e.motion.x, e.motion.y, 40, color_erase);
                     } else {
-                        const RGBA color = {0xFF, 0xFF, 0xFF, 255};
                         draw_line(p_win->p_screen_renderer, p_win->p_texture, start_x, e.motion.x, start_y, e.motion.y, color);
                     }
                     if(p_win->mode == DRAWING) {
@@ -187,6 +200,14 @@ int main() {
                         p_win->mode = SELECTING;
                     } else if(e.key.key == SDLK_E) {
                         p_win->mode = ERASING;
+                    } else if(e.key.key == SDLK_C) {
+                        b_picking_color = true;
+                        float cursor_x, cursor_y;
+                        SDL_GetMouseState(&cursor_x, &cursor_y);
+                        SDL_Point cursor_pos = {cursor_x, cursor_y};
+                        draw_color_picker(p_win->p_screen_renderer, p_win->p_texture, cursor_pos);
+                        picker_x = cursor_x;
+                        picker_y = cursor_y;
                     } else if(e.key.key == SDLK_X) {
                         if(p_win->p_clipboard_texture != NULL) {
                             float center_x, center_y;

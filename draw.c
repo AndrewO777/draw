@@ -1,6 +1,7 @@
 #include <SDL3/SDL.h>
 #include<stdio.h>
 #include<math.h>
+#include <stdlib.h>
 #include"draw.h"
 
 void draw(SDL_Renderer* p_renderer, SDL_Texture* p_draw_texture, SDL_Texture* p_target_texture,SDL_FRect* p_src_rect, SDL_FRect* p_dst_rect) {
@@ -63,6 +64,28 @@ void draw_circle(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const float x
     draw(p_renderer, p_texture, NULL, NULL, NULL);
 }
 
+void draw_color_picker(SDL_Renderer* p_renderer, SDL_Texture* p_base_texture, SDL_Point cursor_pos) {
+    if(p_renderer == NULL) { return; }
+    SDL_Texture* p_texture = SDL_CreateTexture(p_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, p_base_texture->w, p_base_texture->h);
+    draw(p_renderer, p_base_texture, p_texture, NULL, NULL);
+    SDL_SetRenderTarget(p_renderer, p_texture);
+    for(int x = 0; x < 255; ++x) {
+        for(int y = 0; y < 255; ++y) {
+            SDL_SetRenderDrawColor(p_renderer, x, y, 255-abs(x-y), 255);
+            SDL_RenderPoint(p_renderer, cursor_pos.x+x, cursor_pos.y+y);
+        }
+    }
+    draw(p_renderer, p_texture, NULL, NULL, NULL);
+    SDL_DestroyTexture(p_texture);
+}
+
+void save_texture(const char* file_name, SDL_Renderer* p_renderer, SDL_Texture* p_texture) {
+    SDL_SetRenderTarget(p_renderer, p_texture);
+    SDL_Surface* p_surface = SDL_RenderReadPixels(p_renderer, NULL);
+    SDL_SavePNG(p_surface, file_name);
+    SDL_DestroySurface(p_surface);
+    SDL_SetRenderTarget(p_renderer, NULL);
+}
 void draw_select_box(SDL_Renderer* p_renderer, SDL_Texture* p_texture, float x1, float x2, float y1, float y2) {
     if(p_renderer == NULL || p_texture == NULL) { return; }
     SDL_SetRenderTarget(p_renderer, p_texture);
@@ -111,7 +134,7 @@ SDL_Texture* copy_texture(SDL_Renderer* p_renderer, SDL_Texture* p_texture, SDL_
         p_temp_texture = SDL_CreateTexture(p_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, p_src_rect->w, p_src_rect->h);
     }
     if(p_temp_texture == NULL) {
-        printf("Failed to create texture: %s\n", SDL_GetError());
+        printf("Failed to create p_texture: %s\n", SDL_GetError());
         return NULL;
     }
     draw(p_renderer, p_texture, p_temp_texture, p_src_rect, NULL);

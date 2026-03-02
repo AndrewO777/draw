@@ -20,6 +20,10 @@ void draw_rect(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const SDL_FRect
 void draw_line(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const float x1, const float x2, const float y1, const float y2, const RGBA color);
 // Draws a circle to the texture at x,y
 void draw_circle(SDL_Renderer* p_renderer, SDL_Texture* p_texture, const float x, const float y, const float radius, const RGBA color);
+// Draw color picker
+void draw_color_picker(SDL_Renderer* p_renderer, SDL_Texture* p_base_texture, SDL_Point cursor_pos);
+// Save texture to png
+void save_texture(const char* file_name, SDL_Renderer* p_renderer, SDL_Texture* p_texture);
 // Draws a rectangle with dotted lines, doesn't use SDL_RenderRect, it's a grouping of lines.
 void draw_select_box(SDL_Renderer* p_renderer, SDL_Texture* p_texture, float x1, float x2, float y1, float y2);
 // Returns a new texture that has the same content rendered as p_texture.
