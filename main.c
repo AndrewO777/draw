@@ -72,7 +72,6 @@ int main() {
                                 color = new_color;
                             }
                             draw(p_win->p_screen_renderer, p_win->p_texture, NULL, NULL, NULL);
-                            b_picking_color = false;
                             break;
                         }
                         if(p_win->mode == DRAGGING) {
@@ -99,6 +98,10 @@ int main() {
                     b_resizing = false;
                     if (e.button.button == SDL_BUTTON_LEFT) {
                         b_drawing = false;
+                        if(b_picking_color) {
+                            b_picking_color = false;
+                            break;
+                        }
                         if(p_win->mode == BOX_DRAWING) {
                             SDL_FRect rect = get_rect(start_x, e.button.x, start_y, e.button.y);
                             draw_rect(p_win->p_screen_renderer, p_win->p_texture, &rect, color);
@@ -202,6 +205,9 @@ int main() {
                         p_win->mode = ERASING;
                     } else if(e.key.key == SDLK_C) {
                         b_picking_color = true;
+                        if(p_win->mode == SELECTING || p_win->mode == DRAGGING) {
+                            p_win->mode = DRAWING;
+                        }
                         float cursor_x, cursor_y;
                         SDL_GetMouseState(&cursor_x, &cursor_y);
                         SDL_Point cursor_pos = {cursor_x, cursor_y};
