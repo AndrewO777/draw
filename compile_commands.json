@@ -1,0 +1,47 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-Ofast",
+      "-o",
+      "draw",
+      "main.c"
+    ],
+    "directory": "/home/andrew/Programming/C/draw",
+    "file": "/home/andrew/Programming/C/draw/main.c",
+    "output": "/home/andrew/Programming/C/draw/draw"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-Ofast",
+      "-o",
+      "draw",
+      "draw.c"
+    ],
+    "directory": "/home/andrew/Programming/C/draw",
+    "file": "/home/andrew/Programming/C/draw/draw.c",
+    "output": "/home/andrew/Programming/C/draw/draw"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-Ofast",
+      "-o",
+      "draw",
+      "window.c"
+    ],
+    "directory": "/home/andrew/Programming/C/draw",
+    "file": "/home/andrew/Programming/C/draw/window.c",
+    "output": "/home/andrew/Programming/C/draw/draw"
+  }
+]
